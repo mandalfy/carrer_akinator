@@ -513,7 +513,7 @@ class ScoringEngine {
 
         this.askedQuestions = new Set();
         this.questionCount = 0;
-        this.maxQuestions = 15; // Default 15 questions
+        this.maxQuestions = 20; // Default 20 questions
         this.currentTraitId = null;
     }
 

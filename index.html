@@ -4,9 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Akinator - Discover Your Dream Career</title>
-    <meta name="description"
-        content="Answer questions and discover your perfect career match with personalized roadmaps.">
+    <title>Career Akinator - Discover Your Path</title>
+    <meta name="description" content="Answer questions and discover your ideal career with personalized roadmaps.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -30,174 +29,124 @@
             <section class="screen active" id="welcome-screen">
                 <div class="welcome-content">
                     <div class="mascot-container">
-                        <img src="mascot.png" alt="Career Owl Mascot" class="mascot">
-                        <div class="mascot-glow"></div>
-                    </div>
-                    <h1 class="welcome-title">I Can Read Your Mind</h1>
-                    <p class="welcome-subtitle">Think of your dream career. Answer my questions honestly, and I'll guess
-                        what you're thinking of!</p>
-
-                    <div class="stats">
-                        <div class="stat">
-                            <span class="stat-number">15</span>
-                            <span class="stat-label">Questions</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">50+</span>
-                            <span class="stat-label">Careers</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">99%</span>
-                            <span class="stat-label">Accuracy</span>
-                        </div>
+                        <img src="mascot.png" alt="Career Owl" class="mascot">
                     </div>
 
-                    <button class="btn-start" id="start-btn">
-                        <span class="btn-text">Start Reading My Mind</span>
-                        <span class="btn-icon">🔮</span>
+                    <h1 class="welcome-title">Discover Your Path</h1>
+                    <p class="welcome-subtitle">Answer 20 simple questions and uncover career paths tailored to your
+                        personality, interests, and strengths.</p>
+
+                    <div class="features">
+                        <div class="feature">
+                            <span class="feature-number">20</span>
+                            <span class="feature-label">Questions</span>
+                        </div>
+                        <div class="feature-divider"></div>
+                        <div class="feature">
+                            <span class="feature-number">80+</span>
+                            <span class="feature-label">Careers</span>
+                        </div>
+                        <div class="feature-divider"></div>
+                        <div class="feature">
+                            <span class="feature-number">2</span>
+                            <span class="feature-label">Minutes</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" id="start-btn">
+                        Begin Discovery
                     </button>
                 </div>
             </section>
 
             <!-- Question Screen -->
             <section class="screen" id="question-screen">
-                <div class="question-header">
-                    <div class="progress-container">
+                <div class="question-container">
+                    <div class="progress-section">
                         <div class="progress-info">
-                            <span class="progress-text" id="question-number">Question 1 of 15</span>
-                            <span class="confidence-text" id="confidence-text">Thinking...</span>
+                            <span class="progress-label" id="question-number">1 of 20</span>
+                            <span class="progress-percent" id="progress-percent">5%</span>
                         </div>
                         <div class="progress-bar">
                             <div class="progress-fill" id="progress-fill"></div>
                         </div>
                     </div>
-                </div>
 
-                <div class="question-content">
-                    <div class="question-mascot">
-                        <img src="mascot.png" alt="Thinking Owl" class="question-owl" id="question-owl">
-                        <div class="thought-bubble" id="thought-bubble">
-                            <span>🤔</span>
-                        </div>
+                    <div class="question-card">
+                        <p class="question-text" id="question-text">Loading question...</p>
                     </div>
 
-                    <div class="question-card" id="question-card">
-                        <h2 class="question-text" id="question-text">Loading...</h2>
+                    <div class="answer-grid" id="answer-container">
+                        <button class="btn-answer" data-answer="yes">Yes</button>
+                        <button class="btn-answer" data-answer="probably">Probably</button>
+                        <button class="btn-answer" data-answer="maybe">Not Sure</button>
+                        <button class="btn-answer" data-answer="probably_not">Probably Not</button>
+                        <button class="btn-answer" data-answer="no">No</button>
                     </div>
 
-                    <!-- Akinator-style answer buttons -->
-                    <div class="answer-buttons" id="answer-container">
-                        <button class="btn-answer btn-yes" data-answer="yes">
-                            <span class="answer-emoji">✓</span>
-                            <span class="answer-label">Yes</span>
-                        </button>
-                        <button class="btn-answer btn-probably" data-answer="probably">
-                            <span class="answer-emoji">👍</span>
-                            <span class="answer-label">Probably</span>
-                        </button>
-                        <button class="btn-answer btn-maybe" data-answer="maybe">
-                            <span class="answer-emoji">🤷</span>
-                            <span class="answer-label">Maybe</span>
-                        </button>
-                        <button class="btn-answer btn-probably-not" data-answer="probably_not">
-                            <span class="answer-emoji">👎</span>
-                            <span class="answer-label">Probably Not</span>
-                        </button>
-                        <button class="btn-answer btn-no" data-answer="no">
-                            <span class="answer-emoji">✗</span>
-                            <span class="answer-label">No</span>
-                        </button>
-                    </div>
+                    <p class="hint" id="confidence-text"></p>
                 </div>
             </section>
 
             <!-- Thinking Screen -->
             <section class="screen" id="thinking-screen">
-                <div class="thinking-content">
-                    <div class="thinking-mascot">
-                        <img src="mascot.png" alt="Analyzing Owl" class="thinking-owl">
-                        <div class="magic-circle"></div>
-                        <div class="magic-particles">
-                            <span></span><span></span><span></span>
-                            <span></span><span></span><span></span>
-                        </div>
+                <div class="thinking-container">
+                    <div class="loader">
+                        <div class="loader-ring"></div>
+                        <img src="mascot.png" alt="Analyzing" class="loader-mascot">
                     </div>
-                    <h2 class="thinking-title" id="thinking-title">Analyzing your answers...</h2>
-                    <div class="thinking-progress">
-                        <div class="thinking-bar"></div>
-                    </div>
-                    <p class="thinking-subtitle" id="thinking-subtitle">Comparing with 50+ career profiles</p>
+                    <h2 class="thinking-title" id="thinking-title">Analyzing your responses</h2>
+                    <p class="thinking-subtitle" id="thinking-subtitle">Finding the best career matches...</p>
                 </div>
             </section>
 
             <!-- Result Screen -->
             <section class="screen" id="result-screen">
-                <div class="confetti" id="confetti"></div>
-
-                <div class="result-content">
-                    <div class="result-mascot">
-                        <img src="mascot.png" alt="Success Owl" class="result-owl">
-                        <div class="result-glow"></div>
-                    </div>
-
+                <div class="result-container">
                     <div class="result-header">
-                        <p class="result-intro">I'm <span id="confidence-percent">95%</span> sure you're thinking of...
-                        </p>
-                        <div class="result-reveal">
-                            <span class="result-emoji" id="result-emoji">💼</span>
+                        <span class="result-label">Your ideal career path</span>
+                        <div class="result-main">
+                            <span class="result-emoji" id="result-emoji">💻</span>
                             <h1 class="result-title" id="career-name">Software Developer</h1>
                         </div>
-                        <p class="result-description" id="career-description">Description here</p>
+                        <p class="result-description" id="career-description">Description</p>
+                        <span class="confidence-badge" id="confidence-percent">95% match</span>
                     </div>
 
-                    <div class="result-meta">
-                        <div class="meta-card">
-                            <div class="meta-icon">💰</div>
-                            <div class="meta-info">
-                                <span class="meta-label">Salary Range</span>
-                                <span class="meta-value" id="result-salary">$80k - $150k</span>
-                            </div>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <span class="stat-label">Salary Range</span>
+                            <span class="stat-value" id="result-salary">$80k - $150k</span>
                         </div>
-                        <div class="meta-card">
-                            <div class="meta-icon">📈</div>
-                            <div class="meta-info">
-                                <span class="meta-label">Job Growth</span>
-                                <span class="meta-value" id="result-growth">22%</span>
-                            </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Growth</span>
+                            <span class="stat-value" id="result-growth">22%</span>
                         </div>
-                        <div class="meta-card">
-                            <div class="meta-icon">🏷️</div>
-                            <div class="meta-info">
-                                <span class="meta-label">Category</span>
-                                <span class="meta-value" id="result-category">Technology</span>
-                            </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Category</span>
+                            <span class="stat-value" id="result-category">Technology</span>
                         </div>
                     </div>
 
-                    <div class="alternatives" id="alternatives-section">
-                        <h3 class="alternatives-title">Other possibilities</h3>
+                    <div class="alternatives-section" id="alternatives-section">
+                        <h3 class="section-title">Also consider</h3>
                         <div class="alternatives-list" id="other-careers"></div>
                     </div>
 
-                    <div class="roadmap">
-                        <h3 class="roadmap-title">
-                            <span class="roadmap-icon">🗺️</span>
-                            Your Learning Roadmap
-                        </h3>
-                        <div class="roadmap-steps" id="roadmap-timeline"></div>
+                    <div class="roadmap-section">
+                        <h3 class="section-title">Learning Roadmap</h3>
+                        <div class="roadmap-list" id="roadmap-timeline"></div>
                     </div>
 
-                    <button class="btn-restart" id="play-again-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 4v6h6M23 20v-6h-6" />
-                            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
-                        </svg>
-                        Play Again
+                    <button class="btn-secondary" id="play-again-btn">
+                        Start Over
                     </button>
                 </div>
             </section>
         </main>
     </div>
+
+    <div class="confetti" id="confetti"></div>
 
     <script src="careers.js"></script>
     <script src="questions.js"></script>
