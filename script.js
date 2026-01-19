@@ -1,12 +1,20 @@
 /**
- * Career Akinator - Clean Minimal Controller
+ * Career Akinator - LLM-Powered Controller
+ * Connects to backend server for AI-driven career guessing
  */
+
+// ============================================
+// Configuration
+// ============================================
+
+const API_BASE = 'http://localhost:3000/api';
 
 // ============================================
 // Game State
 // ============================================
 
-let scoringEngine;
+let sessionId = null;
+let currentQuestion = null;
 let matchedCareers = [];
 
 // ============================================
@@ -49,7 +57,6 @@ const elements = {
 // ============================================
 
 function init() {
-    scoringEngine = new ScoringEngine();
     bindEvents();
 }
 
@@ -73,137 +80,162 @@ function showScreen(screenName) {
 }
 
 // ============================================
+// API Calls
+// ============================================
+
+async function apiCall(endpoint, method = 'GET', body = null) {
+    const options = {
+        method,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+
+    if (body) {
+        options.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(`${API_BASE}${endpoint}`, options);
+    if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+    }
+    return response.json();
+}
+
+// ============================================
 // Game Flow
 // ============================================
 
-function startGame() {
-    scoringEngine.reset();
-    matchedCareers = [];
-    showScreen("question");
-    displayQuestion();
+async function startGame() {
+    showScreen("thinking");
+    elements.thinkingTitle.textContent = "Starting your career journey...";
+    elements.thinkingSubtitle.textContent = "AI is preparing your first question";
+
+    try {
+        const data = await apiCall('/start', 'POST');
+        sessionId = data.sessionId;
+
+        showScreen("question");
+        displayQuestion(data);
+    } catch (error) {
+        console.error('Failed to start game:', error);
+        elements.thinkingTitle.textContent = "Connection Error";
+        elements.thinkingSubtitle.textContent = "Make sure the server is running (npm start)";
+    }
 }
 
-function displayQuestion() {
-    const questionData = scoringEngine.getNextQuestion();
-
-    if (!questionData || scoringEngine.isComplete()) {
-        showThinkingScreen();
-        return;
-    }
-
+function displayQuestion(data) {
     // Update progress
-    const progress = scoringEngine.getProgress();
+    const progress = data.progress || ((data.questionNumber / 20) * 100);
     elements.progressFill.style.width = progress + "%";
     elements.progressPercent.textContent = Math.round(progress) + "%";
-    elements.questionNumber.textContent = `${questionData.number} of ${questionData.total}`;
+    elements.questionNumber.textContent = `${data.questionNumber} of ${data.totalQuestions || 20}`;
 
     // Update question
-    elements.questionText.textContent = questionData.question;
+    elements.questionText.textContent = data.question;
 
-    // Update hint based on progress
-    if (questionData.number > 10) {
-        const topCareer = scoringEngine.getTopCareers(1)[0];
-        if (topCareer && careerDatabase[topCareer.id]) {
-            elements.confidenceText.textContent = `Leading match: ${careerDatabase[topCareer.id].name}`;
-        }
+    // Update hint if provided
+    if (data.hint && data.questionNumber > 5) {
+        elements.confidenceText.textContent = data.hint;
     } else {
         elements.confidenceText.textContent = "";
     }
+
+    currentQuestion = data;
 }
 
-function handleAnswer(answerId) {
-    scoringEngine.answerQuestion(answerId);
+async function handleAnswer(answerId) {
+    // Map answer IDs to human-readable text
+    const answerText = {
+        'yes': 'Yes',
+        'probably': 'Probably',
+        'maybe': 'Maybe',
+        'probably_not': 'Probably not',
+        'no': 'No'
+    };
 
-    if (scoringEngine.isComplete()) {
-        showThinkingScreen();
-    } else {
-        displayQuestion();
+    // Show loading state
+    elements.questionText.textContent = "Thinking...";
+    elements.confidenceText.textContent = "AI is analyzing your response";
+
+    try {
+        const data = await apiCall('/answer', 'POST', {
+            sessionId,
+            answer: answerText[answerId]
+        });
+
+        if (data.type === 'prediction') {
+            showResult(data);
+        } else {
+            displayQuestion(data);
+        }
+    } catch (error) {
+        console.error('Failed to submit answer:', error);
+        elements.questionText.textContent = "Connection error. Please try again.";
     }
 }
 
-function showThinkingScreen() {
+function showResult(data) {
+    console.log('showResult called with:', data);
+
     showScreen("thinking");
-    matchedCareers = scoringEngine.getTopCareers(5).map(c => c.id);
-
-    // Simple loading messages
-    const messages = [
-        "Analyzing your responses",
-        "Finding best matches",
-        "Almost ready"
-    ];
-
-    let i = 0;
-    const interval = setInterval(() => {
-        i++;
-        if (i < messages.length) {
-            elements.thinkingTitle.textContent = messages[i];
-        }
-    }, 800);
+    elements.thinkingTitle.textContent = "I think I know your ideal career!";
+    elements.thinkingSubtitle.textContent = "Preparing your personalized result...";
 
     setTimeout(() => {
-        clearInterval(interval);
-        showResult();
-    }, 2800);
-}
+        try {
+            // Display prediction
+            elements.confidencePercent.textContent = `${data.confidence || 75}% match`;
+            elements.careerName.textContent = data.career || 'Your Ideal Career';
+            elements.careerDescription.textContent = data.description || 'Based on your answers, this career suits you well.';
 
-function showResult() {
-    const primaryCareerKey = matchedCareers[0];
-    const career = careerDatabase[primaryCareerKey];
+            // Use LLM-generated emoji (fallback to sparkles)
+            elements.resultEmoji.textContent = data.emoji || '✨';
 
-    if (!career) {
-        matchedCareers = ['software_developer'];
-        showResult();
-        return;
-    }
+            // Use LLM-generated category, salary, growth (all from AI)
+            if (elements.resultCategory) elements.resultCategory.textContent = data.category || "Professional";
+            if (elements.resultSalary) elements.resultSalary.textContent = data.salary || "Varies by experience";
+            if (elements.resultGrowth) elements.resultGrowth.textContent = data.growth || "Industry dependent";
 
-    const confidence = scoringEngine.getConfidence();
-    elements.confidencePercent.textContent = `${confidence}% match`;
-    elements.careerName.textContent = career.name;
-    elements.careerDescription.textContent = career.description;
-    elements.resultEmoji.textContent = career.emoji;
-
-    if (elements.resultCategory) elements.resultCategory.textContent = career.category;
-    if (elements.resultSalary) elements.resultSalary.textContent = career.salary;
-    if (elements.resultGrowth) elements.resultGrowth.textContent = career.growth;
-
-    // Build roadmap
-    elements.roadmapTimeline.innerHTML = career.roadmap.map((step, index) => `
-        <div class="roadmap-step">
-            <div class="step-number">${index + 1}</div>
-            <div class="step-content">
-                <h4>${step.title}</h4>
-                <p>${step.desc}</p>
-            </div>
-        </div>
-    `).join("");
-
-    // Other careers
-    if (elements.otherCareers && matchedCareers.length > 1) {
-        elements.otherCareers.innerHTML = matchedCareers.slice(1, 4).map(key => {
-            const c = careerDatabase[key];
-            if (!c) return '';
-            return `
-                <div class="other-career-card" onclick="showCareerDetail('${key}')">
-                    <span>${c.emoji}</span>
-                    <span>${c.name}</span>
+            // Build roadmap from LLM response
+            const roadmap = data.roadmap || ['Start learning', 'Build skills', 'Get experience', 'Launch career'];
+            elements.roadmapTimeline.innerHTML = roadmap.map((step, index) => `
+                <div class="roadmap-step">
+                    <div class="step-number">${index + 1}</div>
+                    <div class="step-content">
+                        <h4>Step ${index + 1}</h4>
+                        <p>${step}</p>
+                    </div>
                 </div>
-            `;
-        }).join('');
-        elements.alternativesSection.style.display = 'block';
-    }
+            `).join("");
 
-    showScreen("result");
-    launchConfetti();
-}
+            // Show alternatives
+            if (elements.otherCareers && data.alternatives && data.alternatives.length > 0) {
+                elements.otherCareers.innerHTML = data.alternatives.slice(0, 3).map(career => {
+                    return `
+                        <div class="other-career-card">
+                            <span>💼</span>
+                            <span>${career}</span>
+                        </div>
+                    `;
+                }).join('');
+                if (elements.alternativesSection) {
+                    elements.alternativesSection.style.display = 'block';
+                }
+            }
 
-function showCareerDetail(careerKey) {
-    matchedCareers = [careerKey, ...matchedCareers.filter(k => k !== careerKey)];
-    showResult();
+            showScreen("result");
+            launchConfetti();
+        } catch (err) {
+            console.error('Error displaying result:', err);
+            elements.thinkingTitle.textContent = "Error displaying result";
+            elements.thinkingSubtitle.textContent = err.message;
+        }
+    }, 1500);
 }
-window.showCareerDetail = showCareerDetail;
 
 // ============================================
-// Confetti - Subtle version
+// Confetti
 // ============================================
 
 function launchConfetti() {
@@ -231,7 +263,8 @@ function launchConfetti() {
 // ============================================
 
 function resetGame() {
-    scoringEngine.reset();
+    sessionId = null;
+    currentQuestion = null;
     matchedCareers = [];
     elements.progressFill.style.width = "0%";
     elements.progressPercent.textContent = "0%";
