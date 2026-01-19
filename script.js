@@ -107,6 +107,9 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 // Game Flow
 // ============================================
 
+// Client-side session storage for serverless compatibility
+let sessionData = null;
+
 async function startGame() {
     showScreen("thinking");
     elements.thinkingTitle.textContent = "Starting your career journey...";
@@ -114,14 +117,17 @@ async function startGame() {
 
     try {
         const data = await apiCall('/start', 'POST');
-        sessionId = data.sessionId;
+
+        // Store session data client-side (for serverless)
+        sessionData = data._session || null;
+        sessionId = data.sessionId || 'local';
 
         showScreen("question");
         displayQuestion(data);
     } catch (error) {
         console.error('Failed to start game:', error);
         elements.thinkingTitle.textContent = "Connection Error";
-        elements.thinkingSubtitle.textContent = "Make sure the server is running (npm start)";
+        elements.thinkingSubtitle.textContent = "Please check that the API is working";
     }
 }
 
@@ -161,9 +167,12 @@ async function handleAnswer(answerId) {
 
     try {
         const data = await apiCall('/answer', 'POST', {
-            sessionId,
-            answer: answerText[answerId]
+            answer: answerText[answerId],
+            _session: sessionData  // Pass session data to serverless function
         });
+
+        // Update session data from response
+        sessionData = data._session || sessionData;
 
         if (data.type === 'prediction') {
             showResult(data);
