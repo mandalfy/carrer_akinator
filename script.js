@@ -7,7 +7,8 @@
 // Configuration
 // ============================================
 
-const API_BASE = 'http://localhost:3000/api';
+// Use relative URL - works for both local dev and Vercel
+const API_BASE = '/api';
 
 // ============================================
 // Game State
